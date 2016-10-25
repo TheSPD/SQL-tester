@@ -1,0 +1,375 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<!doctype html>
+<html lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="generator" content="Polymer Starter Kit" />
+  <title>PlotBase</title>
+  <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+
+  <!-- Chrome for Android theme color -->
+  <meta name="theme-color" content="#303F9F">
+
+  <!-- Web Application Manifest -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Tile color for Win8 -->
+  <meta name="msapplication-TileColor" content="#3372DF">
+
+  <!-- Add to homescreen for Chrome on Android -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="PlotBase - Collection of Plots">
+  <link rel="icon" sizes="192x192" href="images/touch/chrome-touch-icon-192x192.png">
+
+  <!-- Add to homescreen for Safari on iOS -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="PlotBase - Collection of Plots">
+  <link rel="apple-touch-icon" href="images/touch/apple-touch-icon.png">
+
+  <!-- Tile icon for Win8 (144x144) -->
+  <meta name="msapplication-TileImage" content="images/touch/ms-touch-icon-144x144-precomposed.png">
+
+  <!-- build:css styles/main.css -->
+  <link rel="stylesheet" href="styles/main.css">
+  <!-- endbuild-->
+
+  <!-- build:js bower_components/webcomponentsjs/webcomponents-lite.min.js -->
+  <script src="bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+
+  <!-- endbuild -->
+
+  <!-- will be replaced with elements/elements.vulcanized.html -->
+  <link rel="import" href="elements/elements.html">
+
+  <style is="custom-style">
+   #errorMsg{
+    --paper-toast-background-color: red;
+    --paper-toast-color: white;
+  }
+
+  #infoMsg{
+    --paper-toast-color: white;
+  }
+    
+  </style>
+  <!-- endreplace-->
+</head>
+
+<body unresolved class="fullbleed layout vertical">
+  <span id="browser-sync-binding"></span>
+  <template is="dom-bind" id="app">
+    <iron-ajax id="ironAjax" content-type="application/json" on-response="_handleResponse"></iron-ajax>
+    <iron-localstorage value="{{logged}}"></iron-localstorage>
+    <paper-drawer-panel id="paperDrawerPanel">
+      <div drawer>
+
+        <!-- Drawer Toolbar -->
+        <paper-toolbar id="drawerToolbar">
+          <span class="paper-font-title">Menu</span>
+        </paper-toolbar>
+
+        <!-- Drawer Content -->
+        <paper-menu class="list" attr-for-selected="data-route" selected="{{route}}" on-iron-select="onMenuSelect">
+          <a data-route="home" href="/">
+            <iron-icon icon="home"></iron-icon>
+            <span>Home</span>
+          </a>
+
+          <template is="dom-repeat" items="[[allProbs]]">
+            <a data-route="datasetPage" href="/datasetHome/[[item._id]]">
+              <iron-icon icon="unfold-more"></iron-icon>
+              <span>[[item.heading]]</span>
+            </a>   
+          </template>
+        </paper-menu>
+      </div>
+      <paper-header-panel main mode="waterfall-tall">
+
+        <!-- Main Toolbar -->
+        <paper-toolbar id="mainToolbar">
+          <paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
+          <span class="flex"></span>
+
+          <!-- Toolbar icons -->
+          <!-- <paper-icon-button icon="refresh"></paper-icon-button>
+          <paper-icon-button icon="search"></paper-icon-button> -->
+          
+          <paper-button on-click="openQueryBuilder">
+            Query Builder
+          </paper-button>
+
+          <query-builder id="qBuilder" on-apply="searchInput" fields="[[queryParams]]">
+          </query-builder>
+
+          <paper-search-bar id="searchBar" on-paper-search-filter="_openFilter" on-paper-search-search="_searchFilters" hide-filter-button>
+          </paper-search-bar>
+          
+          <paper-filter-dialog id="filterDialog" on-save="_searchFilters" filters="{{filters}}">
+          </paper-filter-dialog>
+           
+          <template is="dom-if" if="{{!logged}}">
+
+            <paper-button type="login" 
+                          on-click="openOverlay" 
+                          icon="account-circle">
+              Login
+            </paper-button>
+            
+            <paper-button type="register" 
+                        on-click="openOverlay" 
+                        icon="account-circle">
+              Register
+            </paper-button>
+
+          </template>
+
+          <template is="dom-if" if="{{logged}}">
+          <div>
+            <paper-menu-button dynamic-align horizontal-align="left" vertical-align="top"><!--  vertical-offset=57 horizontal-offset=11> -->
+            
+              <paper-button icon="menu" class="dropdown-trigger" >
+              <iron-image class="btn-image" src="/api/pic/[[prof.pf_pic]]" sizing="cover"></iron-image> [[logged.userName]]
+              </paper-button>
+
+              <paper-menu class="dropdown-content">
+
+                <paper-item type="userProfile/" 
+                            on-click="_profileButtonAction">
+                            <iron-icon icon="account-box"></iron-icon>Profile
+                </paper-item>
+                <paper-item type="profile/edit" 
+                            on-click="_profileButtonAction">
+                            <iron-icon icon="create"></iron-icon>Edit
+                </paper-item>
+                <paper-item type="logout"
+                            on-click="_profileButtonAction">
+                            <iron-icon icon="power-settings-new"></iron-icon>Logout
+                </paper-item>
+                <template is="dom-if" if="{{logged.isAdmin}}">
+                  <paper-item type="admin"
+                              on-click="_profileButtonAction">
+                              <iron-icon icon="settings"></iron-icon>Admin
+                  </paper-item>
+                </template>
+              </paper-menu>
+            </paper-menu-button>
+            <paper-tooltip>
+              <profile-header style="width: 500px;"
+                              info="{{logged}}"
+                              prof="{{prof}}">
+              </profile-header>
+            </paper-tooltip>
+            </div>
+          </template>
+          
+
+          <!-- Toolbar button actions -->
+          
+          
+          <auth-form id="backdrop" with-backdrop method="{{type}}"></auth-form>
+          
+          <!-- Application name -->
+          <div class="middle paper-font-display2 app-name">{{pageTitle}}</div>
+
+          <!-- Application sub title -->
+          <div class="bottom title"></div>
+
+        </paper-toolbar>
+
+        <!-- Main Content -->
+        <div class="content">
+          <iron-pages attr-for-selected="data-route" selected="{{route}}">
+
+            <section data-route="home">
+              <paper-material elevation="1">
+                <plot-page data="{{allPlots}}"
+                           info="{{logged}}"
+                           datasets="{{allProbs}}"
+                           method="home">
+                </plot-page>              
+              </paper-material>
+            </section>
+
+            <section data-route="datasetHome">
+              <paper-material elevation="1">
+                <dataset-home data="{{allPlots}}"
+                              info="{{logged}}"
+                              method="datasetHome"
+                              data-id="{{dataId}}"
+                              datasets="{{allProbs}}">                  
+                </dataset-home>
+              </paper-material>
+            </section>
+
+            <section data-route="logout">
+              <paper-material elevation="1">
+                <h4>
+                  You are logged out of the application!!!
+                  <br>
+                  Click <a href="/">here</a> to go to home page
+                </h4>
+              </paper-material>
+            </section>
+
+            <template is="dom-if" if="{{!logged}}">
+
+              <section data-route="changePasswordForm">
+                <paper-material elevation="1">
+                  <change-password-form method="forgot"> 
+                  </change-password-form>
+                </paper-material>
+
+              </section>
+
+              <section data-route="changePassword">
+                <paper-material elevation="1">
+                  <change-password></change-password>
+                </paper-material>
+
+              </section>
+            </template>
+
+            <template is="dom-if" if="{{logged}}">
+              <section data-route="profile">
+                <paper-material elevation="1">
+                  <profile-page method="profile" 
+                                info="{{logged}}" 
+                                profile = "{{userProf}}">
+                  </profile-page>
+                </paper-material>
+              </section>
+
+              <section data-route="editProfile">
+                <paper-material elevation="1">
+                  <edit-profile method="update" 
+                                info="{{logged}}" 
+                                profile = "{{prof}}">
+                  </edit-profile>
+                </paper-material>
+              </section>
+
+
+
+              <!-- Non-admin users -->
+              <section data-route="submitPlot">
+                <paper-material elevation="1">
+                  <submit-plot-form method="addPlot" 
+                                    data-id="{{dataId}}" 
+                                    all-columns="{{columnData}}" 
+                                    user="{{logged}}"
+                                    users="[[Users]]">
+                  </submit-plot-form>
+                </paper-material>
+              </section>
+
+              <template is="dom-if" if="{{!logged.isAdmin}}">
+
+                <section data-route="myPlots">
+                  <paper-material elevation="1">
+                    <plot-page data="{{allPlots}}"
+                               info="{{logged}}"
+                               datasets="{{allProbs}}"
+                               method="myPlots">
+                    </plot-page>
+                  </paper-material>
+                </section>
+
+              </template>
+
+
+              <!-- Admin users -->
+              <template is="dom-if" if="{{logged.isAdmin}}">
+                <section data-route="admin">
+                  <paper-material elevation="1">
+                    <admin-page info="{{logged}}" 
+                                profile = "{{prof}}"></admin-page>
+                  </paper-material>
+                </section>
+
+                <section data-route="manageDataset">
+                  <paper-material elevation="1">
+                    <datasets-page method="manageDataset"
+                                   datasets="{{allDatasetsFull}}">
+                    </datasets-page>
+                  </paper-material>
+                </section>
+
+                <section data-route="addDataset">
+                  <paper-material elevation="1">
+                    <add-dataset method="addDataset"></add-dataset>
+                  </paper-material>
+                </section>
+
+                <section data-route="users">
+                  <paper-material elevation="1">
+                    <user-list method="users"
+                               data="{{Users}}"></user-list>
+                  </paper-material>
+                </section>
+              </template>
+
+              <section data-route="editPlot">
+                <paper-material elevation="1">
+                  <edit-plot  method="updatePlot" 
+                              data-id="{{dataId}}" 
+                              all-columns="{{columnData}}" 
+                              plot="{{selectedPlot}}" 
+                              user="{{logged}}"
+                              users="[[Users]]">
+                  </edit-plot>
+                </paper-material>
+              </section>
+
+            </template>
+
+          </iron-pages>
+        </div>
+      </paper-header-panel>
+    </paper-drawer-panel>
+
+    <paper-toast id="caching-complete"
+                 duration="6000"
+                 text="Caching complete! This app will work offline.">
+    </paper-toast>
+
+    <paper-toast id="errorMsg"
+                 class="fit-bottom"
+                 text="{{errorMsg}}">
+    </paper-toast>
+
+    <paper-toast id="infoMsg"
+                 class="fit-bottom"
+                 text="{{infoMsg}}">
+    </paper-toast>
+
+    <platinum-sw-register auto-register
+                          clients-claim
+                          skip-waiting
+                          on-service-worker-installed="displayInstalledToast">
+      <platinum-sw-cache default-cache-strategy="networkFirst"
+                         precache-file="precache.json">
+      </platinum-sw-cache>
+    </platinum-sw-register>
+
+  </template>
+
+  <!-- build:js scripts/app.js -->
+  <script src="scripts/app.js"></script>
+  
+  <!-- endbuild-->
+</body>
+
+</html>

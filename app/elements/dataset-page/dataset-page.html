@@ -1,0 +1,46 @@
+<dom-module id="dataset-page">
+	<style>
+	paper-card {
+		margin-bottom:8px;
+		width: 100%;
+	}
+	</style>
+	<template>
+		<h3>[[data.heading]]</h3>
+		<p>[[data.description]]</p>
+		<paper-button on-click="_getDataset"><iron-icon icon="file-download"></iron-icon>Data</paper-button>
+		<paper-button on-click="_getDatadesc"><iron-icon icon="file-download"></iron-icon>Data description</paper-button>
+		<template is="dom-if" if="{{!info.isAdmin}}">
+			<paper-button on-click="_submitPlot"><iron-icon icon="file-upload"></iron-icon>Post Plot</paper-button>
+		</template>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "dataset-page",
+
+		properties: {
+			method:{
+				type:String,
+			},
+			data:{
+				type: Object,
+			},
+			info:{
+				type: Object,
+			}
+		},
+
+		_getDataset: function(){
+			window.location ='/api/data/' + this.data.dataSet;
+		},
+
+		_getDatadesc: function(){
+			window.location ='/api/data/' + this.data.dataDesc;
+		},
+
+		_submitPlot: function(){
+			page('/datasets/'+this.data._id+'/submit');
+		}
+	})
+</script> 	

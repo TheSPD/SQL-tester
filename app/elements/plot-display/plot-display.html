@@ -1,0 +1,380 @@
+<dom-module id="plot-display">
+	<style is="custom-style" include="iron-flex">
+		.wrapper{
+			max-width: 1200px;
+			height: 500px;
+		}
+
+		.image-container{
+			width: 70%;
+			/*line-height: 520px;*/
+			background-color: #AAA;
+			height: 100%;
+			/*min-height: 480px;*/
+			position: relative;
+			text-align: center;
+			-webkit-user-select: none;
+		}
+
+		.image-container > iron-image{
+			display: inline-block;
+			cursor: pointer;
+			position: relative;
+			height: 100%;
+			width: 100%;
+			--iron-image-width: 100%;
+			--iron-image-height: 100%;
+		}
+
+		.sidebar{
+			width: 29%;
+			background-color: #FFF;
+			overflow: auto;
+			border-left: #AAA 2px solid;
+		}
+
+		.block{
+			display: inline-block;
+			margin-top: 5px;
+			margin-bottom: 5px;
+		}
+
+		.info-panel{
+			margin: 5px;
+		}
+		
+		.button-panel{
+			margin:5px;
+			border-top: #AAA solid 1px ;
+		}
+
+		.comment-section{
+			margin:5px;
+			border-top: #AAA solid 1px ;	
+		}
+
+		.comment{
+			margin: 2px;
+			padding: 2px;
+			border-bottom: #DDD solid 1px;
+			background-color: #DDD;
+		}
+
+		.light { 
+			color: var(--paper-grey-800); 
+		}
+
+		.bold{
+			font-weight: bold;
+		}
+
+		.post-comment{
+			margin: 2px;
+			padding: 2px;
+			border-bottom: #BBB solid 1px;
+		}
+
+		.flexchild {
+			@apply(--layout-flex);
+		}
+
+		.profile-picture {
+			height: 40px;
+			width: 40px;
+			border-radius: 50%;
+			border: solid 2px var(--default-primary-color);
+		}
+
+		.profile-name {
+			margin-top: auto;
+			margin-bottom: auto;
+			margin-left: 5px;
+			cursor: pointer;
+		}
+
+		.comment-profile-picture {
+			height: 30px;
+			width: 30px;
+			border-radius: 50%;
+			border: solid 2px var(--default-primary-color);
+		}
+
+		.comment-text {
+			margin-left: 5px;
+		}
+
+		.name {
+			cursor: pointer;
+		}
+
+		.profile-name:hover, .name:hover {
+		    text-decoration: underline;
+		}
+
+		iron-image {
+			cursor: pointer;
+		}
+
+
+	</style>
+	<template>
+		<iron-ajax
+			id="ajaxRequest"
+			content-type="application/json"
+    	on-response="_setPlot">
+    </iron-ajax>
+    <div><span>[[plotId]]</span></div>
+		<paper-dialog id="dialog" class="dialog"
+			entry-animation="scale-up-animation"
+			exit-animation="fade-out-animation" with-backdrop>
+			<div class="layout horizontal wrap wrapper">
+				<div class="image-container">
+					<iron-image src="/api/plot/[[plot.plot]]">
+					</iron-image>
+				</div>
+				<div class="layout vertical sidebar">
+					<div class="info-panel layout vertical">
+						<div class="layout horizontal">
+							<div profile-id="[[plot.submittedBy._id]]" on-click="_openProfile">
+								<iron-image sizing="cover" class="profile-picture" src="api/pic/[[plot.submittedBy.profile.pf_pic]]"></iron-image>
+							</div>
+							<div class="profile-name block bold" profile-id="[[plot.submittedBy._id]]" on-click="_openProfile">[[plot.submittedBy.fullName]]</div>
+						</div>
+						<div class="block light">[[plot.caption]]</div>
+						<template is="dom-if" if="[[_isLiked(plot.likes)]]">
+							<div class="layout horizontal">
+							<div class="block light">
+								Liked by <b>[[plot.likeNumber]]</b>
+								<paper-tooltip>
+									<template is="dom-repeat" items="[[plot.likes]]">
+										[[item.fullName]]<br>
+									</template>
+								</paper-tooltip>
+							</div>
+							</div>
+						</template>
+					</div>
+					<div class="button-panel ">
+						<div class="block">
+							<paper-button disabled="[[!isLogged(info)]]" on-click="_likePlot" raised>
+								<template is="dom-if" if="[[!plot.liked]]">
+									<iron-icon icon="favorite-border"></iron-icon>
+								</template>
+								<template is="dom-if" if="[[plot.liked]]">
+									<iron-icon icon="favorite"></iron-icon>
+								</template>
+								Like
+							</paper-button>
+							<template is="dom-if" if="[[!isLogged(info)]]">
+								<paper-tooltip>Login to Like!!!</paper-tooltip>
+							</template>
+							<template is="dom-if" if="[[info.isAdmin]]">
+								<paper-button on-click="_publishPlot" raised>
+									<template is="dom-if" if="[[!plot.published]]">
+										<iron-icon icon="check-box-outline-blank"></iron-icon>
+									</template>
+									<template is="dom-if" if="[[plot.published]]">
+										<iron-icon icon="check-box"></iron-icon>
+									</template>
+									Publish
+								</paper-button>
+								<paper-button on-click="_editPlot" raised>
+									<iron-icon icon="create"></iron-icon>
+									Edit
+								</paper-button>
+							</template>
+						</div>
+					</div>
+					<div class="comment-section">
+						<template id="commentList" is="dom-repeat" items="[[plot.comments]]">
+							<div class="comment light layout horizontal" >
+								<div profile-id="[[item.postedBy._id]]" on-click="_openProfile">
+									<iron-image class="comment-profile-picture" src="/api/pic/[[item.postedBy.profile.pf_pic]]" sizing="cover"></iron-image>
+								</div>
+								<div class="comment-text">
+									<span class="name" profile-id="[[item.postedBy._id]]" on-click="_openProfile"><b>[[item.postedBy.fullName]]</b></span>: [[item.text]]
+								</div>
+							</div>
+						</template>
+						<form id="comment" class="post-comment layout horizontal" is="iron-form" method="post">
+							<paper-input class="flexchild" disabled = "[[!isLogged(info)]]" label="Comment something..." required name="comment" class="flexchild">
+							</paper-input>
+							<paper-button disabled = "[[!isLogged(info)]]" on-click="_sendComment" plotid="[[plot._id]]">
+								<iron-icon icon="send"></iron-icon>
+							</paper-button>
+							<template is="dom-if" if="[[!isLogged(info)]]">
+								<paper-tooltip>Login to Comment!!!</paper-tooltip>
+							</template>
+						</form>
+					</div>
+				</div>
+			</div>
+		</paper-dialog>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "plot-display",
+		properties: {
+			plotId : {
+				type: String
+			},
+			dataId: {
+				type: String
+			},
+			plot:{
+				type: Object,
+			},
+			info:{
+				type: Object,
+			},
+			_redrawDummy:{
+				type: Number,
+				value: 0
+			}
+		},
+
+		isLogged: function(info){
+			if(info){
+				return true;
+			}
+			else
+				return false;
+		},
+		getObject: function(_id){
+			for(var i in this.data){
+				if(this.data[i]._id == _id){
+					return i;
+				}
+			}
+			return null;
+		},
+
+		_publishPlot: function(event){
+			debugger;
+			
+			var clickedDataset = this.plot;
+			var path = 'plot.published';
+			this.set(path, !clickedDataset.published);
+
+
+			var response = {
+				type: "togglePublished",
+				data:{
+					plotID: clickedDataset._id
+				}
+			};
+
+			console.log(response);
+
+			this.fire("plot-page-req", response);
+
+		},
+
+		_likePlot: function(event){
+			debugger;
+			
+			var clickedPlot = this.plot;
+			path = 'plot.liked'
+			this.set(path, !clickedPlot.liked);
+
+			if(this.plot.liked)
+				this.set('plot.likeNumber',this.plot.likeNumber+1);
+			else
+				this.set('plot.likeNumber',this.plot.likeNumber-1);
+
+
+			var response = {
+				type: "toggleLikes",
+				data:{
+					plotID: clickedPlot._id,
+				}
+			};
+
+			console.log(response);
+
+			this.fire("plot-page-req", response);
+
+		},
+
+		_sendComment: function(event){
+			var clickedPlotId = this.plot._id;
+
+			var comment = new Object({
+				postedAt: Date.now().toString(),
+				postedBy: this.info,
+				text: this.$.comment.serialize().comment
+			});
+
+			this.push('plot.comments',comment);
+
+			event.preventDefault();
+			
+			var response = {
+				type: "postComment",
+				data: {
+					plotID: clickedPlotId,
+					text: this.$.comment.serialize().comment,
+				}
+			};
+
+			console.log(response);
+
+			this.$.comment.reset();
+
+			this.fire("plot-page-req", response);
+		},
+
+		open: function(){
+			Polymer.dom(document.body).appendChild(this);
+			
+			var response={
+				type: "getPlot",
+				data: {
+					plotId: this.plotId
+				}
+			};
+
+			console.log(response);
+
+			this.$.ajaxRequest.url="/api/getPlot";
+			this.$.ajaxRequest.method="POST";
+			this.$.ajaxRequest.body=response.data;
+			this.$.ajaxRequest.generateRequest();
+		},
+
+		_setPlot: function(data){
+			this.set('plot',data.detail.response.data);
+			this.set('plot.liked',this._isLikedbyMe(this.info.userName,this.plot.likes));
+			this.set('plot.likeNumber',this._getLength(this.plot.likes));
+			this.$.dialog.open();
+		},
+
+		_isLiked: function(arr){
+			if(arr.length>0)
+				return true;
+			else
+				return false;
+		},
+
+		_getLength: function(arr){
+			return arr.length;
+		},
+
+		_isLikedbyMe: function(userName,likeArray){
+			for(user in likeArray){
+				if(likeArray[user].userName == userName)
+					return true;
+			}
+			return false;
+		},
+		_editPlot:function(){
+			page('/datasets/' + this.dataId + '/plots/' + this.plotId + '/edit');
+			this.$.dialog.close();
+		},
+		_openProfile:function(event){
+			page('/userProfile/' + event.currentTarget.profileId);
+			this.$.dialog.close();	
+		}
+	})
+</script>

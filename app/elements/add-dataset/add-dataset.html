@@ -1,0 +1,170 @@
+<dom-module id="add-dataset">
+	<style>
+	vaadin-upload {
+		margin-top: 10px;
+	}
+
+	#picker {
+		margin:0;
+		padding:0;
+	}
+	</style>
+	<template>
+		<form is="iron-form" id="datasetForm" method="post">
+	        <paper-input id="probHead" label="Dataset Name" required name="datasetHead">
+	        </paper-input>
+	        <paper-textarea id="probDesc" label="Short Description" required name="datasetDesc">
+	        </paper-textarea>
+	        <vaadin-upload
+		        id="datasetUpload"
+				name="dataset" 
+				target="/api/uploadData" 
+				method="POST" 
+				max-files="1" 
+				timeout=15000
+				on-upload-success="_uploadSuccessDataset"
+				on-upload-error="_uploadFail" 
+				i18n="[[i18nDataset]]">
+	    	</vaadin-upload>
+	    	<paper-input id="deadline" label="Deadline" required name="deadline" on-tap="_openDateDialog" readonly value="{{deadline}}">
+	        </paper-input>
+	    	<paper-dialog id="dateDialog" class="paper-date-picker-dialog" modal on-iron-overlay-closed="dismissDialog">
+	    		<paper-date-picker id="datePicker" date="[[date]]"></paper-date-picker>
+	    		<div class="buttons">
+	    			<paper-button dialog-dismiss>Cancel</paper-button>
+	    			<paper-button dialog-confirm on-tap="_setDate">OK</paper-button>
+	    		</div>
+	    	</paper-dialog>
+	    	<paper-dialog id="timeDialog" modal class="paper-time-picker-dialog" on-iron-overlay-closed="dismissDialog">
+		    	<paper-time-picker id="timePicker" time="[[time]]"></paper-time-picker>
+		    	<div class="buttons">
+		    		<paper-button dialog-dismiss>Cancel</paper-button>
+		    		<paper-button dialog-confirm on-tap="_setTime">OK</paper-button>
+		    	</div>
+	    	</paper-dialog>
+	        <paper-button on-click="sendForm">Submit
+	    	</paper-button>
+      	</form>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "add-dataset",
+
+		properties: {
+			method:{
+				type:String
+			},
+			fileLocationDataset:{
+				type: String,
+			},
+			fileLocationDatadesc:{
+				type: String,
+			},
+			deadline:{
+				type: String
+			},
+			i18nDataset: {
+		        type: Object,
+		        value: function() {
+		          return {
+		            dropFiles: {
+		              one: 'Drop file here...',
+		              many: 'Drop files here...'
+		            },
+		            addFiles: {
+		              one: 'Select Dataset',
+		              many: 'Upload Dataset'
+		            },
+		            cancel: 'Cancel',
+		            error: {
+		              tooManyFiles: 'Too Many Files.',
+		              fileIsTooBig: 'File is Too Big.',
+		              incorrectFileType: 'Incorrect File Type.'
+		            },
+		            uploading: {
+		              status: {
+		                connecting: 'Connecting...',
+		                stalled: 'Stalled.',
+		                processing: 'Processing File...'
+		              },
+		              remainingTime: {
+		                prefix: 'remaining time: ',
+		                unknown: 'unknown remaining time'
+		              },
+		              error: {
+		                serverUnavailable: 'Server Unavailable',
+		                unexpectedServerError: 'Unexpected Server Error',
+		                forbidden: 'Forbidden'
+		              }
+		            },
+		            units: {
+		              size: ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+		            }
+		          };
+		        }
+		    },
+		},
+
+		sendForm: function(){
+			debugger;
+
+			if(!this.$.datasetForm.validate()){
+				return;
+			}
+
+			event.preventDefault();
+			
+			var response = {
+				type: this.method,
+				formInputs: this.$.datasetForm.serialize()
+			};
+
+			response.formInputs.fileLocationDataset = this.fileLocationDataset;
+			response.formInputs.fileLocationDatadesc = this.fileLocationDatadesc;
+			response.formInputs.deadline = new Date(this.deadline);
+
+			console.log(response);
+
+			this.$.probHead.value = "";
+			this.$.probDesc.value = "";
+
+			this.fire("dataset-form-sent", response);
+
+		},
+
+		_checkDropdown: function(event){
+			event.currentTarget.validate()
+		},
+
+		_uploadSuccessDataset: function(event){
+			debugger;
+			this.fileLocationDataset = JSON.parse(event.detail.xhr.response).data.path;
+			console.log(this.fileLocationDataset);
+		},
+
+		_uploadFail: function(event){
+			debugger;
+			event.detail.file.error = JSON.parse(event.detail.xhr.response).data;
+		},
+
+		_openDateDialog: function(){
+			this.$.dateDialog.open();
+		},
+
+		_setDate: function(){
+			debugger;
+			this.$.deadline.value = this.$.datePicker.date.toISOString().substring(0, 10);
+			this.$.timeDialog.open();
+		},
+
+		_setTime: function(){
+			this.$.deadline.value += " " + this.$.timePicker.time;
+		}
+
+		/** PUBLIC METHODS **/
+		
+
+
+	})
+</script> 	

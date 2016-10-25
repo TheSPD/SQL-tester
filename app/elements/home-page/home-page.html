@@ -1,0 +1,127 @@
+<dom-module id="home-page">
+<style is="custom-style" include="iron-flex">
+    .flex-wrap {
+      @apply(--layout-horizontal);
+      @apply(--layout-wrap);
+    }
+
+	paper-card {
+		margin-left:8px;
+		background-color: grey;
+		--paper-card-header-image :{
+			width: 300px;
+			height: 200px;
+			display: inline-flex;
+		};
+	}
+
+	paper-card + paper-card{
+		margin-left: 20px;
+	}
+	
+	.plot-user {
+		font-weight: bold;
+	}
+	.plot-header { 
+		@apply(--paper-font-headline);
+	}
+	.plot-light { 
+		color: var(--paper-grey-800); 
+	}
+
+	/*.container {
+      @apply(--layout-horizontal);
+    }*/
+
+	.comment{
+		border-bottom: solid 1px;
+		padding: 1pc;
+	}
+
+    .flexchild {
+      @apply(--layout-flex);
+    }
+
+    .comment-section{
+    	background-color: #edebfa;
+    	margin: 1pc;
+    	border-top: solid #e8e8e8 2px;
+    }
+
+    .heading{
+    	color: #7a7a7a;
+    }
+
+    .hover01 paper-card {
+			-webkit-transform: scale(1);
+			transform: scale(1);
+			-webkit-transition: .3s ease-in-out;
+			transition: .3s ease-in-out;
+	}
+
+	.hover01 paper-card:hover {
+    	
+			-webkit-transform: scale(1.3);
+			transform: scale(1.3);
+			z-index: 3;
+
+	}
+
+
+	</style>
+	<template>
+		<div class="flexchild">
+			<template is="dom-repeat" items="[[data]]" >
+				<template is="dom-if" if="[[hasPlots(item)]]">
+					<div>
+						<h2 class="heading">
+							[[item.heading]]
+						</h2>
+					</div>
+					<div class="flex-wrap hover01">
+					<template is="dom-repeat" items="[[item.plots]]" >
+						<div plot = "[[item]]">
+							<paper-card image= "/api/plot/[[item.plot]]">
+								<div class="card-content">
+							      <h4>[[item.xAxis]] vs. [[item.yAxis]]</h4>
+							    </div>
+							</paper-card>	
+						</div>
+					</template>
+					</div>
+				</template>
+			</template>
+		</div>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "home-page",
+
+		properties: {
+			method:{
+				type:String,
+			},
+			data:{
+				type: Array,
+			},
+			info:{
+				type:Object,
+			}
+		},
+
+		getObject: function(_id){
+			for(var i in this.data){
+				if(this.data[i]._id == _id){
+					return i;
+				}
+			}
+			return null;
+		},
+
+		hasPlots: function(obj){
+			return obj.plots.length>0;
+		},
+
+	})
+</script> 	

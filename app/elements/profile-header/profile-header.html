@@ -1,0 +1,59 @@
+<dom-module id="profile-header">
+<style is="custom-style">
+  paper-card{
+    --paper-card-background-color:white;
+  }
+
+  paper-card.profile { @apply(--layout-horizontal); }
+  .profile-content {
+    @apply(--layout-flex);
+    float: left;
+  }
+  .profile-header { 
+    color: var(--primary-text-color);
+    /*margin: 10px 0; */
+    font-size: 16px;
+  }
+  .profile-details { 
+    color: var(--secondary-text-color);
+    /*margin: 10px 0; */
+    font-size: 12px;
+  }
+  paper-icon-button.profile-icon {
+    --iron-icon-fill-color: white;
+    --iron-icon-stroke-color: var(--paper-grey-600);
+  }
+</style>
+<template>
+<paper-card class="profile">
+  <div class="profile-content">
+    <div class="card-content">
+      <span class="profile-header">[[info.fullName]]</span>
+      <span class="profile-details">@[[info.userName]]<br>
+      [[prof.year]] - [[prof.major]]</span>
+    </div>
+    <div class="card-actions">
+      <paper-icon-button class="profile-icon" icon="star"></paper-icon-button>
+      <paper-icon-button class="profile-icon" icon="star"></paper-icon-button>
+    </div>
+  </div>
+</paper-card>
+</template>
+<dom-module>
+<script type="text/javascript">
+  Polymer({
+    is: "profile-header",
+
+    properties: {
+      info:{
+        type: Object,
+      },
+      prof:{
+        type: Object,
+      }
+    },
+
+    
+
+  })
+</script>   

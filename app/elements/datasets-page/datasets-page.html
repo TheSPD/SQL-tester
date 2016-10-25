@@ -1,0 +1,185 @@
+<dom-module id="datasets-page">
+	<style>
+
+
+	.dataset-container{
+		border-radius: 1%;
+	}
+
+	.dataset {
+		padding: 20px;
+		background-color: white;
+		border: 2px solid #777;
+		cursor: pointer;
+		border-radius: 1%;
+		@apply(--layout-horizontal);
+	}
+
+	.collapse {
+		padding: 10px;
+		background-color: white;
+		border: 1px solid #ddd;
+		border-radius: 1%;
+	}
+
+	.dataset :focus{
+		outline: -webkit-focus-ring-color auto;
+	}
+
+	.spacer {
+		height: 20px;
+		width: 100%;
+	}
+
+	.icon-buttons {
+		@apply(--layout-horizontal);
+	}
+
+
+	.heading{
+		@apply(--layout-flex);
+	}
+
+	.delete :hover{
+		fill: #F66;
+	}
+
+	.delete :active{
+		fill: #F33;
+	}
+
+	.collapse-toggle :hover{
+		fill: #66F;
+	}
+
+	.collapse-toggle :active{
+		fill: #33F;
+	}
+
+	.download :hover{
+		fill: #66F;
+	}
+
+	.download :active{
+		fill: #33F;
+	}
+
+	.button {
+		margin: 0px 5px;
+	}
+
+	.top-buttons {
+		@apply(--layout-horizontal);
+		@apply(--layout-end-justified);
+		margin: 10px;
+	}
+
+	.add {
+		background-color: var(--dark-primary-color);
+		color: var(--text-primary-color);
+	}
+
+	</style>
+	<template>
+		<div class="top-buttons">
+			<paper-button class="add" on-click="_addDataset">
+				<iron-icon icon="file-upload" >
+				</iron-icon>
+				Add Dataset
+			</paper-button>
+		</div>
+		<iron-list id="list" items="[[datasets]]" as="item" selectionEnabled>
+			<template>
+				<div class="dataset-container">
+					<div class="dataset" tabindex="1">
+						<div class="heading">
+							[[item.heading]]
+						</div>
+						<div class="icon-buttons">
+							<div class="download button" on-click="_download">
+								<iron-icon icon="file-download"></iron-icon>
+							</div>
+							<div class="delete button" on-click="_deleteConfirmation">
+								<iron-icon icon="delete"></iron-icon>
+							</div>
+							<div class="collapse-toggle button" on-click="_selectDataset">
+								<iron-icon icon="arrow-drop-down"></iron-icon>
+							</div>
+						</div>
+					</div>
+					<iron-collapse opened="[[item.isCollapsed]]">
+						<div class="collapse">
+							[[item.description]]   
+						</div>
+					</iron-collapse>
+					
+					<div class="spacer">
+					</div>
+				</div>
+				
+			</template>
+		</iron-list>
+		<paper-dialog id="deleteDialog"
+									entry-animation="scale-up-animation"
+					  			exit-animation="fade-out-animation"
+					  			alwaysOnTop>
+			<h2>Confirm Deletion</h2>
+			<p>This will delete the dataset along with any related student submissions.
+			<br>Are you sure you want to delete?
+			</p>
+			<div class="buttons">
+				<paper-button dialog-dismiss autofocus>No</paper-button>
+				<paper-button dialog-confirm on-click="_deleteItem">Yes</paper-button>
+			</div>
+		</paper-dialog>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "datasets-page",
+
+		properties: {
+			datasets:{
+				type: Array
+			},
+		},
+
+		_selectDataset: function(e){
+			this.$.list.selectItem(e.model.item);
+			this.set('datasets.' + e.model.index + '.isCollapsed',!e.model.item.isCollapsed);
+		},
+
+		_download: function(e){
+			window.location ='/api/data/' + e.model.item.dataSet;
+		},
+
+		_deleteConfirmation: function(e){
+			this.$.deleteDialog.item = e.model.item;
+			this.$.deleteDialog.open();
+		},
+
+		_deleteItem: function(){
+			alert("Going to delete " + this.$.deleteDialog.item.heading);
+			debugger;
+
+			event.preventDefault();
+			
+			var response = {
+				type: "removeDataset",
+				detail: {
+					dataId : this.$.deleteDialog.item._id
+				}
+			};
+
+			console.log(response);
+
+			this.fire("dataset-form-sent", response);
+			
+		},
+
+		_addDataset: function(){
+			page("/admin/addDataset");
+		}
+
+	})
+</script>   

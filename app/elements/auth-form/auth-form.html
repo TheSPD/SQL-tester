@@ -1,0 +1,88 @@
+<dom-module id="auth-form">
+	<style>
+		form {
+			background: white;
+			color: black;
+			padding: 24px;
+			box-shadow: rgba(0, 0, 0, 0.24) -2.3408942051048403px 5.524510324047423px 12.090680100755666px 0px, rgba(0, 0, 0, 0.12) 0px 0px 12px 0px;
+		}
+
+		iron-icon{
+			color: var(--secondary-text-color);
+		}
+	</style>
+	<template>
+		<form is="iron-form" id="form" method="post" tabindex="-1">
+			
+	        <paper-input id="nickname" label="Username" required name="nickname" value="{{info.nickname}}" auto-validate pattern="[a-zA-Z0-9]*" tabindex="0">
+	        <iron-icon suffix icon="account-circle"></iron-icon>
+	        </paper-input>
+	        <paper-input id="pwd" label="Password" required type="password" name="pwd" value="{{info.pwd}}" auto-validate tabindex="1">
+	        <iron-icon suffix icon="lock"></iron-icon>
+	        </paper-input>
+    	
+			<template is="dom-if" if="{{isRegistration(method)}}" tabindex="2">
+				<profile-form fullname = "{{info.fullname}}" >
+				</profile-form>
+			</template>
+	        <paper-button on-click="sendForm" tabindex="3">Submit
+	    	</paper-button>
+	    	<template is="dom-if" if="{{!isRegistration(method)}}" tabindex="4">
+	    		<b><a href="/changePasswordForm">Forgot Password</a></b>
+	    	</template>
+      	</form>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "auth-form",
+
+		properties: {
+			method: {
+				type: String,
+				value: 'login'
+			},
+			profile: {
+				type:Object,
+			},
+		},
+
+		behaviors: [
+      		Polymer.IronOverlayBehavior
+    	],
+
+		/** PUBLIC METHODS **/
+
+		isRegistration: function(method){
+			return method === 'register' ;
+		},
+
+		sendForm: function(event){
+			debugger;
+
+			if(this.method === 'login'){
+				if(!(this.$.form.nickname.validate() && this.$.form.pwd.validate())){
+					return;
+				}
+			}
+			else{
+				if(!this.$.form.validate()){
+					return;
+				}
+			}
+
+			event.preventDefault();
+			
+			var response = {
+				type: this.method,
+				formInputs: this.$.form.serialize()
+			};
+
+			console.log(response);
+
+			this.fire("auth-form-sent", response);
+
+			this.$.form.reset()
+		}
+	})
+</script> 	

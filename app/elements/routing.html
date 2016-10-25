@@ -1,0 +1,212 @@
+<!--
+@license
+Copyright (c) 2015 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<script src="../../bower_components/page/page.js"></script>
+<script>
+  window.addEventListener('WebComponentsReady', function() {
+
+    // We use Page.js for routing. This is a Micro
+    // client-side router inspired by the Express router
+    // More info: https://visionmedia.github.io/page.js/
+
+    /** USER IS NOT LOGGED **/ 
+    page('/', function () {
+      var response = {
+        type: 'getDatasets',
+      };
+      console.log(response);
+      app.fire("home-page-req", response);
+      response = {
+        type: 'getAllPlots',
+        data:{
+          query: app.searchQuery,
+          filter: app.selectedFilter
+        }
+      };
+      console.log(response);
+      app.fire("home-page-req", response);
+      if(app.logged){
+        response = {
+            type: "profile",
+            user: app.logged
+        };
+        console.log(response);
+        app.fire("prof-page-req", response);
+      }
+      app.pageTitle = "PlotBase - Home";
+      app.route = 'home';
+    });
+
+    page('/datasetHome/:dataId', function (data) {
+      app.dataId = data.params.dataId;
+      var response = {
+        type: 'getDataPlots',
+        dataset: {
+          dataID: data.params.dataId,
+          query: app.searchQuery,
+          filter: app.selectedFilter
+        }
+      };
+      console.log(response);
+      app.fire("home-page-req", response);
+      app.pageTitle = "PlotBase - Home";
+      app.route = 'datasetHome';
+    });
+
+    page('/logout', function () {
+      app._logOutuser();
+      // app.pageTitle = "PlotBase - Logout";
+      // app.route = 'logout';
+    });
+
+    page('/changePasswordForm', function () {
+      app.pageTitle = "PlotBase - Change Password Form";
+      app.route = 'changePasswordForm';
+    });
+
+    page('/changePassword', function () {
+      app.pageTitle = "PlotBase - Change Password";
+      app.route = 'changePassword';
+    });
+
+    /** USER IS LOGGED **/
+    page('/userProfile/:userId', function (data) {
+      debugger;
+      var response = {
+          type: "userProfile",
+          user:{
+            userId: data.params.userId
+          } 
+      };
+      console.log(response);
+      app.fire("prof-page-req", response);
+
+      app.pageTitle = "PlotBase - My profile";
+      app.route = 'profile';
+    });
+
+    page('/profile/edit', function () {
+      var response = {
+        type: "profile",
+        user: app.logged
+      };
+      console.log(response);
+      app.fire("prof-page-req", response);
+      app.pageTitle = "PlotBase - Edit profile";
+      app.route = 'editProfile';
+    });
+
+    page('/admin', function () {
+      app.pageTitle = "PlotBase - Admin Console";
+      app.route = 'admin';
+    });
+
+    page('/admin/manageDataset', function () {
+      debugger;
+      var response = {
+        type: 'getDatasetsFull',
+      };
+      console.log(response);
+      app.fire("dataset-form-sent", response);
+      app.pageTitle = "PlotBase - Manage Data-sets";
+      app.route = 'manageDataset';
+    });
+
+    page('/admin/addDataset', function () {
+      app.pageTitle = "PlotBase - Add Data-set";
+      app.route = 'addDataset';
+    });
+
+    page('/datasets/:dataId/submit', function (data) {
+      app.dataId = data.params.dataId;
+
+      var response = {
+        type: "getColumns",
+        dataset: {
+          dataID: data.params.dataId
+        }
+      };
+      console.log(response);
+      app.fire("plot-page-req", response);
+
+      var response = {
+        type: "getUsers",
+      };
+      console.log(response);
+      app.fire("user-page-req", response);
+
+      app.pageTitle = "PlotBase - Submit Plot";
+      app.route = 'submitPlot';
+    });  
+
+    page('/datasets/:dataID/myPlots', function (data) {
+
+      app.dataID = data.params.dataID;
+      var response = {
+        type: "getMyPlots",
+        dataset: {
+          dataID: data.params.dataID,
+          filter: app.selectedFilter
+        }
+      };
+      console.log(response);
+      app.fire("plot-page-req", response);
+      app.pageTitle = "PlotBase - My Plots";
+      app.route = 'myPlots';
+    });
+
+    page('/users', function () {
+      var response = {
+        type: 'getUsers',
+      };
+      console.log(response);
+      app.fire("user-page-req", response);
+      app.pageTitle = "PlotBase - Users";
+      app.route = 'users';
+    }); 
+
+    page('/datasets/:dataId/plots/:plotId/edit', function (data) {
+      app.dataId = data.params.dataId;
+
+      var response = {
+        type: "getColumns",
+        dataset: {
+          dataID: data.params.dataId
+        }
+      };
+      console.log(response);
+      app.fire("plot-page-req", response);
+
+      var response = {
+        type: "getUsers",
+      };
+      console.log(response);
+      app.fire("user-page-req", response);
+
+      var response = {
+        type: "getPlot",
+        data: {
+          plotId: data.params.plotId
+        }
+      };
+      console.log(response);
+      app.fire("plot-page-req", response);
+
+      app.pageTitle = "PlotBase - Edit Plot";
+      app.route = 'editPlot';
+    }); 
+
+    // add #! before urls
+    page({
+      hashbang: true
+    });
+
+  });
+</script>

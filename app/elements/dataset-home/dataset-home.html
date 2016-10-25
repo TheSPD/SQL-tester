@@ -1,0 +1,61 @@
+<dom-module id="dataset-home">
+	<style>
+		paper-fab {
+			--paper-fab-background: var(--default-primary-color);
+			--paper-fab-keyboard-focus-background: var(--light-primary-color);
+		}
+
+		.dropdown-content > paper-fab{
+			--paper-fab-background: var(--light-primary-color);
+			--paper-fab-keyboard-focus-background: white;
+		}
+		
+		.bottom-right{
+			position: fixed;
+			right: 25px;
+			bottom: 25px;
+		}
+	</style>
+	<template>
+		<plot-page data="[[data]]"
+				   info="[[info]]"
+				   datasets="[[datasets]]"
+				   method="[[method]]"
+				   data-id="[[dataId]]">
+		</plot-page>
+		<paper-fab-speed-dial direction="top" class="bottom-right">
+			<paper-fab icon="add" class="dropdown-trigger"></paper-fab>
+			<div class="dropdown-content">
+				<div>
+					<paper-fab mini icon="star-border"></paper-fab>
+					<paper-tooltip position="left">Add 	Stuff</paper-tooltip>
+				</div>
+				<div><paper-fab mini icon="star-half"></paper-fab></div>
+				<div><paper-fab mini icon="star"></paper-fab></div>
+			</div>
+		</paper-fab-speed-dial>
+</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "dataset-home",
+		properties:{
+			dataId:{
+				type : String,
+			},
+			data: {
+				type:Array,
+			},
+			info: {
+				type:Object,
+			},
+			datasets: {
+				type: Array,
+			},
+			method: {
+				type: String,
+			}
+		}
+
+	})
+</script> 	

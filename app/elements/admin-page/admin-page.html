@@ -1,0 +1,42 @@
+<dom-module id="admin-page">
+	<style>
+	a {
+		text-decoration: none;
+		color: inherit;
+	}
+	</style>
+	<template>
+		You are admin!!!
+		<br />
+		<br />
+		
+		<paper-button raised on-click="_addDataset">
+            Manage Dataset
+		</paper-button>
+
+		<paper-button raised on-click="_manageUsers">
+            User Management
+		</paper-button>
+		
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "admin-page",
+
+		properties: {
+		
+		},
+
+		_addDataset: function(){
+			page('/admin/manageDataset');
+			// page('/admin/addDataset');
+		},
+
+		_manageUsers: function(){
+			page('/users');
+		}		
+
+
+	})
+</script> 	

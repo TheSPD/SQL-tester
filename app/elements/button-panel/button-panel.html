@@ -1,0 +1,173 @@
+<dom-module id="button-panel">
+	<style is="custom-style" include="iron-flex">
+		.style-scope.plot-page{
+			-webkit-margin-before: 0.25em;
+			-webkit-margin-after: 0.25em;
+		}
+
+		.btn-panel{
+			@apply(--layout-horizontal);
+			/*@apply(--layout-end-justified);*/
+		}
+
+		.btn-panel-left{
+			@apply(--layout-flex);
+		}
+
+		.upload-btn{
+			background-color: var(--dark-primary-color);
+			color: var(--text-primary-color);
+		}
+
+		.upload-dialog{
+			@apply(--layout-vertical);
+		}
+
+	</style>
+	<template>
+		<div class="btn-panel">
+		<div class="btn-panel-left">
+			<template is="dom-if" if="[[info.isAdmin]]">
+				<paper-button raised on-click="_manageDataset">
+					Manage Datasets
+				</paper-button>
+
+				<paper-button raised on-click="_manageUsers">
+					Manage Users
+				</paper-button>
+			</template>			
+		</div>
+		<div class="btn-panel-right">
+			<template is="dom-if" if="[[!info.isAdmin]]">
+				<template is="dom-if" if="[[!isMyPlot(method)]]">
+					<template is="dom-if" if="[[isDatasetHome(method)]]">
+						<paper-button raised on-click="_getDataset">
+							<iron-icon icon="file-download"></iron-icon>
+							Data
+						</paper-button>
+					</template>
+					<paper-button raised on-click="_myPlots">
+						<iron-icon icon="assessment"></iron-icon>
+						My Plots
+					</paper-button>
+				</template>
+			</template>
+			<template is="dom-if" if="[[info.isAdmin]]">
+				<paper-button class="upload-btn" raised on-click="_uploadDataset">
+				<iron-icon icon="file-upload"></iron-icon>
+				Upload Data
+			</paper-button>	
+			</template>
+			<paper-button class="upload-btn" raised on-click="_uploadPlot">
+				<iron-icon icon="file-upload"></iron-icon>
+				Upload Plot
+			</paper-button>
+		</div>
+		</div>
+		<paper-dialog id="dialog" class="upload-dialog" with-backdrop>
+			<h2>Choose Dataset for uploading plot</h2>
+			<form>
+				<paper-dropdown-menu label="Dataset" id="dataset" required>
+					<paper-menu class="dropdown-content">
+						<template is="dom-repeat" items="[[datasets]]">
+							<paper-item data-id="[[item._id]]">
+								[[item.heading]]
+							</paper-item>
+						</template>
+					</paper-menu>
+				</paper-dropdown-menu>
+					<paper-button raised on-click="_submit" type="submit">Submit
+				</paper-button>
+			</form>
+		</paper-dialog>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "button-panel",
+
+		properties: {
+			method:{
+				type: String,
+			},
+			data:{
+				type:Object,
+			},
+
+			datasets:{
+				type: Array,
+			},
+			dataId:{
+				type: String,
+			},
+			info:{
+				type:Object,
+			}
+		},
+
+		isDatasetHome: function(method){
+			return (this.method == "datasetHome");
+		},
+
+		isMyPlot: function(){
+			debugger;
+			return (this.method == "myPlots");
+		},
+
+		_uploadPlot: function(){
+			if(this.isDatasetHome(this.data)){
+				page('/datasets/'+ this.dataId +'/submit');
+			}
+			else{
+				this.$.dialog.open();
+			}
+		},
+
+		_submit: function(){
+			if(!this.$.dataset.validate()){
+				return;
+			}
+
+			this.$.dialog.close();
+
+			page('/datasets/'+ this.$.dataset.selectedItem.dataId +'/submit');
+		},
+
+		_searchDataset: function(){
+			for (var dataset in this.datasets) {
+				if (this.datasets[dataset]._id == this.dataId){
+					return this.datasets[dataset];
+				}
+			}
+			return null;
+		},
+
+		_getDataset: function(){
+			debugger;	
+			window.location ='/api/data/' + this._searchDataset().dataSet;
+			// window.location ='/api/data/' + this.data[0].dataDesc;
+		},
+
+		_myPlots:function(){
+			if(this.isDatasetHome(this.method)){
+				page('/datasets/'+ this.dataId +'/myPlots');
+			}
+			else{
+				page('/datasets/'+ 'all' +'/myPlots');	
+			}
+		},
+
+		_uploadDataset:function(){
+			page('/admin/addDataset');
+		},
+
+		_manageDataset: function(){
+			page('/admin/manageDataset');
+		},
+
+		_manageUsers: function(){
+			page('/users');
+		}	
+
+	})
+</script> 	

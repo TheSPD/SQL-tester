@@ -1,0 +1,75 @@
+<dom-module id="user-list">
+  <style>
+  table {
+      border-collapse: collapse;
+      width: 100%;
+  }
+
+  td, th {
+      border: 1px solid #dddddd;
+      text-align: left;
+      padding: 8px;
+  }
+
+  tr:nth-child(even) {
+      background-color: #dddddd;
+  }
+  </style>
+  <template>
+    <table>
+      <tr>
+        <th>Username</th>
+        <th>Name</th>
+        <th>Admin</th>
+      </tr>
+      <template is="dom-repeat" items="[[data]]">
+        <tr user="[[item]]">
+          <td>[[item.userName]]</td>
+          <td>[[item.fullName]]</td>
+          <td>
+            <paper-checkbox checked="[[item.isAdmin]]" on-click="_toggleAdmin">
+            </paper-checkbox>
+          </td>
+        </tr>
+      </template>
+    </table>
+  </template>
+</dom-module>
+<script type="text/javascript">
+  Polymer({
+    is: "user-list",
+
+    properties: {
+      method:{
+        type:String,
+      },
+      data:{
+        type: Object,
+      },
+    },
+
+    _toggleAdmin: function(event){
+      debugger;
+      var clickedUser = event.currentTarget.parentElement.parentElement.parentElement.user;
+
+      var response = {
+        type: "toggleAdmin",
+        data:{
+          userID: clickedUser._id,
+        }
+      };
+
+      console.log(response);
+
+      this.fire("user-page-req", response);
+    }
+  })
+</script>   
+
+<style>
+
+</style>
+</head>
+<body>
+
+

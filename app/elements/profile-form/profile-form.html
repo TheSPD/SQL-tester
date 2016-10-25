@@ -1,0 +1,120 @@
+<dom-module id="profile-form">
+	<style>
+	</style>
+	<template>
+		<paper-input hidden label="Full Name" name="fullname" value="{{fullname}}">
+        </paper-input>
+        <paper-input required label="First Name" name="f_name" value="{{f_name}}" auto-validate pattern="[a-zA-Z]*" error-message="letters only!">
+        </paper-input>
+        <paper-input required label="Last Name" name="l_name" value="{{l_name}}" auto-validate pattern="[a-zA-Z]*" error-message="letters only!">
+    	</paper-input>
+    	<gold-email-input required name = "email" value="{{email}}" auto-validate error-message="not valid email ID!">
+    	<iron-icon suffix icon="mail"></iron-icon>
+    	</gold-email-input>
+    	<paper-dropdown-menu-light on-click="_checkDropdown" required label="Major" name="major" value = "{{major}}">
+		  	<paper-listbox class="dropdown-content">
+		  		<template is="dom-repeat" items="{{allMajors}}">
+		    		<paper-item>{{item}}</paper-item>
+		    	</template>
+		  	</paper-listbox>
+		</paper-dropdown-menu-light>
+		<paper-dropdown-menu-light on-click="_checkDropdown" required label="Year" name="year" value = "{{year}}">
+		  	<paper-listbox class="dropdown-content">
+		  		<template is="dom-repeat" items="{{allYears}}">
+		    		<paper-item>{{item}}</paper-item>
+		    	</template>
+		  	</paper-listbox>
+		</paper-dropdown-menu-light>
+    	</paper-input>
+    	<paper-input required label="Net ID" name="netid" value="{{netid}}" auto-validate pattern="[a-zA-Z0-9]*" error-message="letters and numerals only!">
+		</paper-input>
+		<paper-input hidden label="File Upload Path" name="fileLocation" value="{{fileLocation}}">
+		</paper-input>
+		<vaadin-upload 	name="userPhoto" 
+						target="/api/uploadImage" 
+						method="POST" 
+						max-files="1"
+						timeout=15000
+						on-upload-success="_uploadSuccess" 
+						on-upload-error="_uploadFail"
+						i18n="[[i18nImage]]">
+		</vaadin-upload>
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "profile-form",
+		properties: {
+			fullname: {
+				type: String,
+				computed : '_computeFullName(f_name,l_name)'
+			},
+			allMajors: {
+				type: Array,
+				value: ['Computers','Statistics','Business','Others']
+			},
+			allYears: {
+				type: Array,
+				value: ['Freshman','Sophomore','Junior','Senior','Graduate','Others']
+			},
+			fileLocation: {
+				type: String,
+			},
+			i18nImage: {
+		        type: Object,
+		        value: function() {
+		          return {
+		            dropFiles: {
+		              one: 'Drop file here...',
+		              many: 'Drop files here...'
+		            },
+		            addFiles: {
+		              one: 'Select Profile Image',
+		              many: 'Upload Profile Image'
+		            },
+		            cancel: 'Cancel',
+		            error: {
+		              tooManyFiles: 'Too Many Files.',
+		              fileIsTooBig: 'File is Too Big.',
+		              incorrectFileType: 'Incorrect File Type.'
+		            },
+		            uploading: {
+		              status: {
+		                connecting: 'Connecting...',
+		                stalled: 'Stalled.',
+		                processing: 'Processing File...'
+		              },
+		              remainingTime: {
+		                prefix: 'remaining time: ',
+		                unknown: 'unknown remaining time'
+		              },
+		              error: {
+		                serverUnavailable: 'Server Unavailable',
+		                unexpectedServerError: 'Unexpected Server Error',
+		                forbidden: 'Forbidden'
+		              }
+		            },
+		            units: {
+		              size: ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+		            }
+		          };
+		        }
+		    },
+		},
+		_computeFullName: function(f_name,l_name){
+			return f_name + ' ' + l_name;
+		},
+		_checkDropdown: function(event){
+			event.currentTarget.validate()
+		},
+		_uploadSuccess: function(event){
+			debugger;
+			this.fileLocation = JSON.parse(event.detail.xhr.response).data.path;
+			console.log(this.fileLocation);
+		},
+		_uploadFail: function(event){
+			debugger;
+			event.detail.file.error = JSON.parse(event.detail.xhr.response).data;
+		}
+	})
+</script>

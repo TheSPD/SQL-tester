@@ -1,0 +1,72 @@
+<dom-module id="profile-page">
+	<style>
+		iron-image {
+	  	  width: 250px;
+	  	  height: 250px;
+	  	  border-radius: 50%;
+		  margin-right: 40px;
+		  border:solid #3f51b5 5px;
+		  padding: 5px;
+	  	}
+
+		div.show-image {
+			@apply(--layout-horizontal);
+			@apply(--layout-center-justified);
+		}
+
+		table{
+			width:100%;
+		}
+
+		td {
+		    padding: 15px;
+		    text-align: left;
+		}
+	</style>
+	<template>		
+		<div class="show-image">
+			<iron-image sizing="cover" alt="Profile Picture" src="../../api/pic/{{profile.pf_pic}}"></iron-image>
+		</div>
+		<table>
+			<tr>
+				<td><b>Name:</b></td>
+				<td><b>{{profile.l_name}}, {{profile.f_name}}</b></td>
+			</tr>
+			<tr>
+				<td><b>Email:</b></td>
+				<td><b>{{profile.email}}</b></td>
+			</tr>
+			<tr>
+				<td><b>Major:</b></td>
+				<td><b>{{profile.major}}</b></td>
+			</tr>
+			<tr>
+				<td><b>Year:</b></td>
+				<td><b>{{profile.year}}</b></td>
+			</tr>
+			<tr>
+				<td><b>NetID:</b></td>
+				<td><b>{{profile.netid}}</b></td>
+			</tr>
+		</table>
+		
+	</template>
+</dom-module>
+<script type="text/javascript">
+	Polymer({
+		is: "profile-page",
+		properties: {
+			info: {
+				type: Object
+			},
+			method:{
+				type: String
+			},
+			profile:{
+				type: Object,
+			},
+		},
+		ready: function(){
+		}
+	})
+</script>
