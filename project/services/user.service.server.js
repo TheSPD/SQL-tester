@@ -40,6 +40,9 @@ module.exports = function(app,models){
 	app.post('/api/login', login);
 	app.post('/api/forgot', forgot);
 	app.post('/api/uploadImage', uploadImage);
+
+	// ======================= LOGGED IN ROUTES ======================= //
+
 	app.post('/api/profile', profile);
 	app.post('/api/userProfile', userProfile);
 	app.post('/api/update', update);
@@ -455,10 +458,6 @@ module.exports = function(app,models){
 	 		res.end(JSON.stringify(response));
 	 	});
 	}
-
-	// ======================= LOGGED IN ROUTES ======================= //
-
-	// =================== USER =================== //
 
 	/** 
 	 * profile
