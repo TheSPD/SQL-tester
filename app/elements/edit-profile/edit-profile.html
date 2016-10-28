@@ -1,33 +1,32 @@
 <dom-module id="edit-profile">
 	<style>
 		img {
-	  	  width: 250px;
-	  	  height: 250px;
-	  	  border-radius: 50%;
-		  border:solid var(--default-primary-color) 5px;
-		  padding: 5px;
-		  display: block;
-    	  margin: 5px auto;
-    	  position: relative;
-	  	}
+				width: 250px;
+				height: 250px;
+				border-radius: 50%;
+			border:solid var(--default-primary-color) 5px;
+			padding: 5px;
+			display: block;
+				margin: 5px auto;
+				position: relative;
+			}
 
-	  	div.show-image:hover img{
-    		opacity:0.5;
+			div.show-image:hover img{
+				opacity:0.5;
 		}
 
 		div.show-image:hover .update {
-		    display: block;
+				display: block;
 		}
 		div.show-image .update {
 			position: absolute;
-  			top: 25%;
-  			left: 50%;
-  			transform: translate(-50%, -50%);
-		    display:none;
+				top: 25%;
+				left: 50%;
+				transform: translate(-50%, -50%);
+				display:none;
 		}
 	</style>
 	<template>		
-		<h1>Edit profile : </h1> 
 		<form is="iron-form" id="form" method="post">
 		<!-- <paper-checkbox on-change="_toggleHidden"> -->
 		<paper-input hidden name="nickname" value="{{info.nickname}}"></paper-input>
@@ -35,64 +34,64 @@
 		<img class="profilePicture" alt="Profile Picture" src="../../api/pic/{{profile.pf_pic}}"></img>
 		<paper-button on-click="_handleChange" class="update">Change</paper-button>
 		</div>
-		<paper-dialog id="change-image" alwaysOnTop withBackdrop auto-fit-on-attach on-iron-overlay-closed="_handleDialogClosed" fit-into="{{picture}}">
-		  <h2>Image</h2>
-		  <vaadin-upload 
-		  id="imageUpload"
-		name="userPhoto"
-		target="/api/uploadDisplayPicture" 
-		method="POST" 
-		max-files="1" 
-		timeout=15000
-		accept="image/*"
-		on-upload-success="_uploadSuccess" i18n="[[i18nImage]]">
-		</vaadin-upload>
-		  <div class="buttons">
-		    <paper-button dialog-dismiss>Cancel</paper-button>
-		    <paper-button dialog-confirm>Accept</paper-button>
-		  </div>
+		<paper-dialog id="change-image" alwaysOnTop with-backdrop on-iron-overlay-closed="_handleDialogClosed">
+			<h2>Image</h2>
+			<vaadin-upload 
+				id="imageUpload"
+				name="userPhoto"
+				target="/api/uploadDisplayPicture" 
+				method="POST" 
+				max-files="1" 
+				timeout=15000
+				accept="image/*"
+				on-upload-success="_uploadSuccess" i18n="[[i18nImage]]">
+			</vaadin-upload>
+			<div class="buttons">
+				<paper-button dialog-dismiss>Cancel</paper-button>
+				<paper-button dialog-confirm>Accept</paper-button>
+			</div>
 		</paper-dialog>
 		<!-- </paper-checkbox> -->
- 		
+		
 		<!-- <paper-checkbox on-change="_toggleDisable"> -->
 		<paper-input on-change="_toggleDisable" required label="First Name" name="f_name" value="{{profile.f_name}}" auto-validate pattern="[a-zA-Z]*" error-message="letters only!">
-        </paper-input>
-        <!-- </paper-checkbox> -->
-        <!-- <paper-checkbox on-change="_toggleDisable"> -->
-        <paper-input on-change="_toggleDisable" required label="Last Name" name="l_name" value="{{profile.l_name}}" auto-validate pattern="[a-zA-Z]*" error-message="letters only!">
-        </paper-input>
-        <!-- </paper-checkbox> -->
-        <!-- <paper-checkbox on-change="_toggleDisable"> -->
-    	<gold-email-input on-change="_toggleDisable" required name = "email" value="{{profile.email}}" auto-validate error-message="not valid email ID!">
-    	</gold-email-input>
-    	<!-- </paper-checkbox> -->
+				</paper-input>
+				<!-- </paper-checkbox> -->
+				<!-- <paper-checkbox on-change="_toggleDisable"> -->
+				<paper-input on-change="_toggleDisable" required label="Last Name" name="l_name" value="{{profile.l_name}}" auto-validate pattern="[a-zA-Z]*" error-message="letters only!">
+				</paper-input>
+				<!-- </paper-checkbox> -->
+				<!-- <paper-checkbox on-change="_toggleDisable"> -->
+			<gold-email-input on-change="_toggleDisable" required name = "email" value="{{profile.email}}" auto-validate error-message="not valid email ID!">
+			</gold-email-input>
+			<!-- </paper-checkbox> -->
 		<!-- <paper-checkbox on-change="_toggleDisable"> -->
-    	<paper-dropdown-menu on-click="_checkDropdown" required label="Major" name="major">
-		  	<paper-menu on-iron-activate="_toggleDisable" class="dropdown-content" selected = "{{majorNumber}}">
-		  		<template is="dom-repeat" items="{{allMajors}}">
-		    		<paper-item>{{item}}</paper-item>
-		    	</template>
-		  	</paper-menu>
+			<paper-dropdown-menu on-click="_checkDropdown" required label="Major" name="major">
+				<paper-menu on-iron-activate="_toggleDisable" class="dropdown-content" selected = "{{majorNumber}}">
+					<template is="dom-repeat" items="{{allMajors}}">
+						<paper-item>{{item}}</paper-item>
+					</template>
+				</paper-menu>
 		</paper-dropdown-menu>
 		<!-- </paper-checkbox> -->
 		<!-- <paper-checkbox on-change="_toggleDisable"> -->
 		<paper-dropdown-menu on-change="_toggleDisable" on-click="_checkDropdown" required label="Year" name="year" value = "{{profile.year}}">
-		  	<paper-listbox on-iron-activate="_toggleDisable" class="dropdown-content" selected = "{{yearNumber}}">
-		  		<template is="dom-repeat" items="{{allYears}}">
-		    		<paper-item>{{item}}</paper-item>
-		    	</template>
-		  	</paper-listbox>
+				<paper-listbox on-iron-activate="_toggleDisable" class="dropdown-content" selected = "{{yearNumber}}">
+					<template is="dom-repeat" items="{{allYears}}">
+						<paper-item>{{item}}</paper-item>
+					</template>
+				</paper-listbox>
 		</paper-dropdown-menu>
 		<!-- </paper-checkbox> -->
 		<!-- <paper-checkbox on-change="_toggleDisable"> -->
-    	<paper-input on-change="_toggleDisable" required label="Net ID" name="netid" value="{{profile.netid}}" auto-validate pattern="[a-zA-Z0-9]*" error-message="letters and numerals only!">
+			<paper-input on-change="_toggleDisable" required label="Net ID" name="netid" value="{{profile.netid}}" auto-validate pattern="[a-zA-Z0-9]*" error-message="letters and numerals only!">
 		</paper-input>
 		<!-- </paper-checkbox> -->
 		<paper-input hidden label="File Upload Path" name="fileLocation" value="{{fileLocation}}">
 		</paper-input>
 		<paper-button id="submit" disabled on-click="sendForm" profile="{{profile}}">Submit
-	    </paper-button>
-      	</form>
+			</paper-button>
+				</form>
 	</template>
 </dom-module>
 <script type="text/javascript">
@@ -134,45 +133,45 @@
 				type: String
 			},
 			i18nImage: {
-		        type: Object,
-		        value: function() {
-		          return {
-		            dropFiles: {
-		              one: 'Drop file here...',
-		              many: 'Drop files here...'
-		            },
-		            addFiles: {
-		              one: 'Select Image',
-		              many: 'Upload Image'
-		            },
-		            cancel: 'Cancel',
-		            error: {
-		              tooManyFiles: 'Too Many Files.',
-		              fileIsTooBig: 'File is Too Big.',
-		              incorrectFileType: 'Incorrect File Type.'
-		            },
-		            uploading: {
-		              status: {
-		                connecting: 'Connecting...',
-		                stalled: 'Stalled.',
-		                processing: 'Processing File...'
-		              },
-		              remainingTime: {
-		                prefix: 'remaining time: ',
-		                unknown: 'unknown remaining time'
-		              },
-		              error: {
-		                serverUnavailable: 'Server Unavailable',
-		                unexpectedServerError: 'Unexpected Server Error',
-		                forbidden: 'Forbidden'
-		              }
-		            },
-		            units: {
-		              size: ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
-		            }
-		          };
-		        }
-		    },
+						type: Object,
+						value: function() {
+							return {
+								dropFiles: {
+									one: 'Drop file here...',
+									many: 'Drop files here...'
+								},
+								addFiles: {
+									one: 'Select Image',
+									many: 'Upload Image'
+								},
+								cancel: 'Cancel',
+								error: {
+									tooManyFiles: 'Too Many Files.',
+									fileIsTooBig: 'File is Too Big.',
+									incorrectFileType: 'Incorrect File Type.'
+								},
+								uploading: {
+									status: {
+										connecting: 'Connecting...',
+										stalled: 'Stalled.',
+										processing: 'Processing File...'
+									},
+									remainingTime: {
+										prefix: 'remaining time: ',
+										unknown: 'unknown remaining time'
+									},
+									error: {
+										serverUnavailable: 'Server Unavailable',
+										unexpectedServerError: 'Unexpected Server Error',
+										forbidden: 'Forbidden'
+									}
+								},
+								units: {
+									size: ['B', 'kB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB']
+								}
+							};
+						}
+				},
 		},
 		_findMajorNumber: function(profile){
 			return this.allMajors.indexOf(profile.major);
